@@ -13,23 +13,32 @@ return [
 
     'roles_structure' => [
         'editor_chefe' => [
+            'artigo' => 'c,r,u,d',
             'users' => 'c,r,u,d',
-            'payments' => 'c,r,u,d',
-            'profile' => 'r,u'
+            'posts' => 'c,r,u,d',
+            'cartas' => 'c,r,u,d'
         ],
         'editor' => [
             'users' => 'c,r,u,d',
-            'profile' => 'r,u'
+            'cartas' => 'c,r,u,d',
+            'users' => 'c,r,u,d',
+            'posts' => 'c,r,u,d',
         ],
         'autor' => [
-            'profile' => 'c,r,u',
+            'artigo' => 'c,r,u,d',
+            'cartas' => 'r,u',
+            'posts' => 'c,r,u,d',
+            'users' => 'r',
         ],
         'usuario' => [
-            'profile' => 'r,u',
-        ],
-        'role_name' => [
-            'module_1_name' => 'c,r,u,d',
+            'artigo' => 'r',
+            'cartas' => 'r,u',
+            'users' => 'r',
+            'posts' => 'r',
         ]
+        // 'role_name' => [
+        //     'module_1_name' => 'c,r,u,d',
+        // ]
     ],
 
     'permissions_map' => [

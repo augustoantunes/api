@@ -3,8 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TesteController;
-
+use App\Http\Controllers\Api\ArtigosController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -35,8 +34,10 @@ Route::group([
 
 Route::group([
     'prefix' => 'artigo'
-
 ], function ($router) {
-    Route::post('/', [TesteController::class, 'index']);
+    Route::get('/', [ArtigosController::class, 'show']);
+    Route::post('/', [ArtigosController::class, 'store']);
+    Route::delete('/{id}', [ArtigosController::class, 'store']);
+    Route::put('/', [ArtigosController::class, 'store']);
 
 });

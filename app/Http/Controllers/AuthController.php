@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -48,26 +49,51 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|confirmed|min:6',
-        ]);
+        try {
 
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+            DB::beginTransaction();
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|between:2,100',
+                'email' => 'required|string|email|max:100|unique:users',
+                'password' => 'required|string|confirmed|min:6',
+                'role' => 'required|string'
+            ]);
+
+
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), 400);
+            } else {
+
+                $user = new User();
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->password = bcrypt($request->password);
+                $user->status = true;
+                $user->imagem = '/uploads/users/default-user.jpg';
+                $user->save();
+
+                $role = ($request->role == ('usuario' || 'autor')) ? $request->role : 'usuario';
+                $user->syncRoles([$role]);
+
+                DB::commit();
+                return response()->json([
+                    'message' => 'Cadastro feito com sucesso',
+                ], 201);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Erro ao completar a criação do artigo' . $e->getMessage(),
+                    'numrow' => 0,
+                    'data' => null
+                ],
+                200
+            );
         }
-
-        $user = User::create(array_merge(
-                    $validator->validated(),
-                    ['password' => bcrypt($request->password)]
-                ));
-
-        $user->attachRole($request->role);
-        return response()->json([
-            'message' => 'User successfully registered',
-            'user' => $user
-        ], 201);
     }
 
 

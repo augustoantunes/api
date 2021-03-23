@@ -17,7 +17,7 @@ class CreateArtigosTable extends Migration
             $table->id();
             $table->boolean('status')->default(0);
             $table->boolean('submicao')->default(0);
-            $table->string('lang');
+            $table->string('lang')->default('pt');
             $table->string('titulo');
             $table->string('subtitulo')->nullable();
             $table->string('imagem')->nullable();
