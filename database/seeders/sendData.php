@@ -161,5 +161,9 @@ class sendData extends Seeder
             ['nome' => 'Direito', 'slug' => 'direito', 'ciencia_id' => 2],
             ['nome' => 'Computação', 'slug' => 'computacao', 'ciencia_id' => 2]
         ]);
+
+        DB::table('edicoes')->insert([
+            ['numero' => '000001', 'status' => 0],
+        ]);
     }
 }

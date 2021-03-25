@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\ArtigosController;
+use App\Http\Controllers\Api\EdicoesController;
+use App\Http\Controllers\Api\CategoriaController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,5 +42,26 @@ Route::group([
     Route::post('/', [ArtigosController::class, 'store']);
     Route::delete('/{id}', [ArtigosController::class, 'store']);
     Route::put('/', [ArtigosController::class, 'store']);
+
+});
+
+Route::group([
+    'prefix' => 'categoria'
+], function ($router) {
+    Route::get('/', [CategoriaController::class, 'index']);
+    Route::get('/{id}', [CategoriaController::class, 'show']);
+    Route::post('/', [CategoriaController::class, 'store']);
+    Route::delete('/{id}', [CategoriaController::class, 'store']);
+    Route::put('/', [CategoriaController::class, 'store']);
+
+});
+
+
+Route::group([
+    'prefix' => 'edicao'
+], function ($router) {
+    Route::get('/', [EdicoesController::class, 'show']);
+    Route::post('/publicar', [EdicoesController::class, 'store']);
+
 
 });

@@ -4,6 +4,7 @@ namespace App\Models\Api;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Artigo extends Model
 {
@@ -11,9 +12,7 @@ class Artigo extends Model
 
     protected $table = 'artigos';
 
-    protected $hidden = [
-
-    ];
+    protected $hidden = [];
 
 
     public function categorias()
@@ -21,4 +20,20 @@ class Artigo extends Model
         return $this->belongsToMany(Categoria::class, 'artigos_has_categorias', 'artigos_id', 'categorias_id');
     }
 
+    public function autores()
+    {
+        return $this->belongsToMany(User::class, 'intervenientes', 'artigos_id', 'users_id')->wherePivot('role','=', 'AUTOR');
+    }
+    public function revisores()
+    {
+        return $this->belongsToMany(User::class, 'intervenientes', 'artigos_id', 'users_id')->wherePivot('role','=', 'REVISOR');
+    }
+    public function intervenientes()
+    {
+        return $this->belongsTo(Interveniente::class, 'id', 'artigos_id');
+    }
+    public function edicoes()
+    {
+        return $this->belongsTo(Edicao::class, 'edicoes_id', 'id');
+    }
 }
