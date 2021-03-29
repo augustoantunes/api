@@ -35,9 +35,7 @@ class CategoriaController extends Controller
                 'numrow' => 0,
                 'pageSize' => 0,
                 'currentPage' => 0,
-                'data' => [
-                    $data
-                ]
+                'data' => $data
             ]
         );
     }

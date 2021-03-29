@@ -66,7 +66,7 @@ class EdicoesController extends Controller
         return response()->json(
             [
                 'status' => true,
-                'message' => 'Edições Listados com sucesso',
+                'message' => 'Edições Listadas com sucesso',
                 'numrow' => $rowCount,
                 'pageSize' => $pageSize,
                 'currentPage' => $currentPage,

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Revista Ciêntifica'),
 
     /*
     |--------------------------------------------------------------------------
@@ -119,7 +119,7 @@ return [
     |
     */
 
-    'key' => env('APP_KEY'),
+    'key' => env('APP_KEY', 'base64:DCnco0fMAmlOGRRmcbtnmVAYPK7mTae1/XJpq1VQJxg='),
 
     'cipher' => 'AES-256-CBC',
 
