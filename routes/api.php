@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\ArtigosController;
+use App\Http\Controllers\Api\AvaliacaoController;
 use App\Http\Controllers\Api\EdicoesController;
 use App\Http\Controllers\Api\CategoriaController;
 
@@ -42,6 +43,7 @@ Route::group([
     Route::post('/', [ArtigosController::class, 'store']);
     Route::delete('/{id}', [ArtigosController::class, 'store']);
     Route::put('/', [ArtigosController::class, 'store']);
+    Route::get('/download/{id}', [ArtigosController::class, 'download']);
 
 });
 
@@ -62,6 +64,15 @@ Route::group([
 ], function ($router) {
     Route::get('/', [EdicoesController::class, 'show']);
     Route::post('/publicar', [EdicoesController::class, 'store']);
+
+
+});
+
+Route::group([
+    'prefix' => 'avaliacao'
+], function ($router) {
+    Route::get('/', [AvaliacaoController::class, 'show']);
+    Route::post('/publicar', [AvaliacaoController::class, 'salvarAvalicao']);
 
 
 });

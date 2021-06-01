@@ -12,6 +12,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -242,5 +243,14 @@ class ArtigosController extends Controller
             $edicao->save();
             return $edicao->refresh();
         }
+    }
+
+    public function download($id){
+
+        $artigo = Artigo::find($id);
+        if($artigo){
+            return Storage::download('public/files/'.$artigo->file);
+        }
+
     }
 }
