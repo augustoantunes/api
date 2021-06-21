@@ -43,86 +43,88 @@ class ArtigosController extends Controller
         });
 
 
-        /* Verifica se existe permissão para visualização de artigos */
-        if (true === true) {
+        /* Instancia a classe de artigos para se executar uma pesquisa */
+        $query = Artigo::where('lang', '=', $lang);
 
-            /* Instancia a classe de artigos para se executar uma pesquisa */
-            $query = Artigo::where('lang', '=', $lang);
+        /* Veirificar se o artigo é publicado ou pendente */
 
-            /* Veirificar se o artigo é publicado ou pendente */
-            if ($request->query('fase')) {
-                $query->where('fase', '=', $request->query('fase'));
+        if (!$request->query('status')) {
+            if(!($this->Usuario && $this->Usuario->hasRole(['revisor', 'editor', 'editor_chefe']))){
+                $query->where('status', '=', 'PUBLICADO');
             }
+        } else if($request->query('status')){
 
-            /* Veirificar se o artigo é publicado ou pendente */
-            if ($request->query('artigo')) {
-                if(!($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe']))){
-                    $query->where('status', '=', 'PUBLICADO');
-                }
-                $query->where('id', '=', $request->query('artigo'));
+            if($this->Usuario && $this->Usuario->hasRole(['revisor', 'editor', 'editor_chefe'])){
+                $query->where('status', '=', $request->query('status'));
+            } else {
+                $query->where('status', '=', 'PUBLICADO');
             }
+        }
 
-            /* Trazer todos os artigos do usuário logado */
-            if ($request->query('me')) {
-                $query->whereHas('intervenientes', function ($destaque) {
-                    $destaque->where('users_id', '=', $this->Usuario->id)
+
+        // /* Veirificar se o artigo é publicado ou pendente */
+        // if ($request->query('status')) {
+        //     if($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])){
+        //         $query->where('status', '=', $request->query('status'));
+        //     }
+        // }
+
+        /* Trazer todos os artigos do usuário logado */
+        if ($request->query('me')) {
+            $query->whereHas('intervenientes', function ($destaque) {
+                $destaque->where('users_id', '=', $this->Usuario->id)
                     ->where('role', '=', 'AUTOR');
-                });
-            }
-            /* Trazer todos os artigos de um determinado Autor*/
-            if ($request->query('autor')) {
-                $autor_id = $request->query('autor');
-                $query->whereHas('intervenientes', function ($destaque) use($autor_id) {
-                    $destaque->where('users_id', '=', $autor_id)
+            });
+        }
+        /* Trazer todos os artigos de um determinado Autor*/
+        if ($request->query('autor')) {
+            $autor_id = $request->query('autor');
+            $query->whereHas('intervenientes', function ($destaque) use ($autor_id) {
+                $destaque->where('users_id', '=', $autor_id)
                     ->where('role', '=', 'AUTOR');
-                });
-            }
+            });
+        }
 
-            /* Trazer todos os artigos de um determinado Revisor*/
-            if ($request->query('revisor') && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
-                $autor_id = $request->query('revisor');
-                $query->whereHas('intervenientes', function ($destaque) use($autor_id) {
-                    $destaque->where('users_id', '=', $autor_id)
+        /* Trazer todos os artigos de um determinado Revisor*/
+        if ($request->query('revisor') && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
+            $autor_id = $request->query('revisor');
+            $query->whereHas('intervenientes', function ($destaque) use ($autor_id) {
+                $destaque->where('users_id', '=', $autor_id)
                     ->where('role', '=', 'REVISOR');
-                });
-            }
-            /* Trazer todos os artigos de uma determinada Categoria*/
-            if ($request->query('categoria')) {
-                $categoria = $request->query('categoria');
-                $query->whereHas('categorias', function ($table) use($categoria) {
-                    $table->where('slug', '=', $categoria);
-                });
-            }
+            });
+        }
+        /* Trazer todos os artigos de uma determinada Categoria*/
+        if ($request->query('categoria')) {
+            $categoria = $request->query('categoria');
+            $query->whereHas('categorias', function ($table) use ($categoria) {
+                $table->where('slug', '=', $categoria);
+            });
+        }
 
-            /* Trazer todos os artigos pertencentes a uma determinada edição*/
-            if ($request->query('edicao')) {
-                $edicao = $request->query('edicao');
-                $query->whereHas('edicoes', function ($table) use($edicao, $request) {
-                    $table->where('numero', '=', $edicao);
-                    if($request->query('edicao_status') && $request->query('edicao_status') == false){
-                        $table->where('status', '=', 0);
-                    } else {
-                        $table->where('status', '=', 1);
-                    }
-                });
-            }
+        /* Trazer todos os artigos pertencentes a uma determinada edição*/
+        if ($request->query('edicao')) {
+            $edicao = $request->query('edicao');
+            $query->whereHas('edicoes', function ($table) use ($edicao, $request) {
+                $table->where('numero', '=', $edicao);
+                if ($request->query('edicao_status') && $request->query('edicao_status') == false) {
+                    $table->where('status', '=', 0);
+                } else {
+                    $table->where('status', '=', 1);
+                }
+            });
+        }
 
 
-            $rowCount = count($query->get());
-            $query->orderBy('id', 'desc')->paginate($pageSize);
+        $rowCount = count($query->get());
+        $query->orderBy('id', 'desc')->paginate($pageSize);
 
-            /* Cria um array para adicionar os resultados da pesquisa */
-            $data = [];
+        /* Cria um array para adicionar os resultados da pesquisa */
+        $data = [];
 
-            foreach ($query->get() as $artigo) {
-                $artigo['autor'] = $artigo->autores()->get();
-                $artigo['categoria'] = $artigo->categorias()->get();
-                array_push($data, $artigo);
-            }
-        } else {
-
-            $rowCount = 0;
-            $data = [];
+        foreach ($query->get() as $artigo) {
+            $artigo['autor'] = $artigo->autores()->get();
+            $artigo['categoria'] = $artigo->categorias()->get();
+            array_push($data, $artigo);
         }
 
 
@@ -234,7 +236,7 @@ class ArtigosController extends Controller
         } else {
             $list = Edicao::where('status', '=', 1)->orderByDesc('id')->limit(1);
             $numero = 1;
-            if($list->get()){
+            if ($list->get()) {
                 $numero = $list->get()[0]->id + 1;
             }
             $edicao = new Edicao();
@@ -245,12 +247,12 @@ class ArtigosController extends Controller
         }
     }
 
-    public function download($id){
+    public function download($id)
+    {
 
         $artigo = Artigo::find($id);
-        if($artigo){
-            return Storage::download('public/files/'.$artigo->file);
+        if ($artigo) {
+            return Storage::download('public/files/' . $artigo->file);
         }
-
     }
 }

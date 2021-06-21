@@ -15,7 +15,7 @@ class CreateArtigosTable extends Migration
     {
         Schema::create('artigos', function (Blueprint $table) {
             $table->id();
-            $table->string('status')->default('SUBMISSAO');
+            $table->string('status')->default('SUBMETIDO');
             $table->string('lang')->default('pt');
             $table->string('titulo');
             $table->string('subtitulo')->nullable();

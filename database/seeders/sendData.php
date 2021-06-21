@@ -15,14 +15,14 @@ class sendData extends Seeder
     public function run()
     {
         //
-        // DB::table('roles')->insert([
-        //     ['name' => 'autor', 'display_name' => 'Autor', 'description'=> 'Autor da revista'],
-        //     ['name' => 'revisor', 'display_name' => 'Revisor', 'description' => 'Revisor da revista'],
-        //     ['name' => 'editor', 'display_name' => 'Editor', 'description' => 'Editor da  revista'],
-        //     ['name' => 'editor_chefe', 'display_name' => 'Editor Chefe', 'description' => 'Edito chefe da revista'],
-        //     ['name' => 'usuario', 'display_name' => 'Usuário', 'description'=> 'Usuário']
+        DB::table('roles')->insert([
+            ['name' => 'autor', 'display_name' => 'Autor', 'description'=> 'Autor da revista'],
+            ['name' => 'revisor', 'display_name' => 'Revisor', 'description' => 'Revisor da revista'],
+            ['name' => 'editor', 'display_name' => 'Editor', 'description' => 'Editor da  revista'],
+            ['name' => 'editor_chefe', 'display_name' => 'Editor Chefe', 'description' => 'Edito chefe da revista'],
+            ['name' => 'usuario', 'display_name' => 'Usuário', 'description'=> 'Usuário']
 
-        // ]);
+        ]);
 
         // DB::table('permissions')->insert([
 

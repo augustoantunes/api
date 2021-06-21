@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ArtigosController;
 use App\Http\Controllers\Api\AvaliacaoController;
 use App\Http\Controllers\Api\EdicoesController;
 use App\Http\Controllers\Api\CategoriaController;
+use App\Http\Controllers\Api\UsersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,9 +64,14 @@ Route::group([
     'prefix' => 'edicao'
 ], function ($router) {
     Route::get('/', [EdicoesController::class, 'show']);
-    Route::post('/publicar', [EdicoesController::class, 'store']);
+    Route::post('/', [EdicoesController::class, 'store']);
+    Route::get('/lst', [EdicoesController::class, 'lstEdicao']);
+});
 
-
+Route::group([
+    'prefix' => 'usuarios'
+], function ($router) {
+    Route::get('/', [UsersController::class, 'show']);
 });
 
 Route::group([
@@ -73,6 +79,15 @@ Route::group([
 ], function ($router) {
     Route::get('/', [AvaliacaoController::class, 'show']);
     Route::post('/publicar', [AvaliacaoController::class, 'salvarAvalicao']);
-
-
 });
+
+
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');

@@ -19,7 +19,7 @@ class EdicoesController extends Controller
 
     public function __construct()
     {
-        $this->middleware('jwt-auth', ['except' => ['show']]);
+        $this->middleware('jwt-auth', ['except' => ['show', 'store']]);
         $this->Usuario = Auth::user();
     }
 
@@ -78,7 +78,8 @@ class EdicoesController extends Controller
     public function store(Request $request)
     {
 
-        if ($this->Usuario->hasRole(['editor', 'editor_chefe'])) {
+        if (true == true) {
+            // if ($this->Usuario->hasRole(['editor', 'editor_chefe'])) {
 
             DB::beginTransaction();
 
@@ -86,33 +87,49 @@ class EdicoesController extends Controller
 
                 $validator = Validator::make($request->all(), [
                     'edicao' => 'required',
+                    'numero' => 'required',
+                    'artigos' => ' required'
                 ]);
 
                 if ($validator->fails()) {
                     return response()->json(['status' => true, 'message' => $validator->errors()->all()]);
                 } else {
 
-                    /* Trazer todos os artigos pertencentes a uma determinada edição*/
 
-                    $edicao = $request->edicao;
-                    $query = Artigo::where('status', '=', 'PUBLICAR');
-                    $query->whereHas('edicoes', function ($table) use ($edicao) {
-                        $table->where('numero', '=', $edicao);
-                    });
+                    //Pesquisar a edição sumetida e verificar se ela existe antes de actualizala;
+                    $edicao = Edicao::find($request->edicao);
 
-                    foreach($query->get() as $artigo) {
+                    if ($edicao) {
 
-                        $artigo->status = 'PUBLICADO';
-                        $artigo->save();
+                        if (!empty($request->artigos)) {
 
+                            $lstIdArtigos = explode(',', $request->artigos);
+
+                            foreach ($lstIdArtigos as $index => $idArtigo) {
+                                $artigo = Artigo::find($idArtigo);
+                                $artigo->edicoes_id = $edicao->id;
+                                $artigo->status = 'PUBLICADO';
+                                $artigo->save();
+                            }
+                        }
                     }
 
-                    $queryEdicao = Edicao::where('numero', '=', $edicao)->first();
-                    $queryEdicao->status = 1;
-                    $queryEdicao->save();
+                    $edicao->status = 1;
+                    $edicao->save();
+
+                    // Criação de Nova Edição
+
+                    $numero = intval($request->edicao);
+                    $novaEdicao = new Edicao();
+                    $novaEdicao->numero = str_pad(($numero + 1), 6, '0', STR_PAD_LEFT);
+                    $novaEdicao->status = 0;
+                    $novaEdicao->save();
+
+                    // $$item = $this->novaEdicao();
 
 
                     DB::commit();
+
                     return response()->json(
                         [
                             'status' => true,
@@ -128,7 +145,7 @@ class EdicoesController extends Controller
                 return response()->json(
                     [
                         'status' => false,
-                        'message' => 'Erro ao completar a criação do artigo' . $e->getMessage(),
+                        'message' => 'Erro ao completar a criacao da edicao ' . $e->getMessage(),
                         'numrow' => 0,
                         'data' => null
                     ],
@@ -148,4 +165,52 @@ class EdicoesController extends Controller
             );
         }
     }
+
+    public function lstEdicao()
+    {
+
+
+        $result = null;
+
+        if ($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
+            $edicoes = Edicao::where('status', '=', 0)->orderByDesc('id')->limit(1);
+            $result = $edicoes->get()[0];
+        }
+
+        return response()->json(
+            [
+                'status' => false,
+                'message' => 'Operação realizada com sucesso!',
+                'numrow' => 0,
+                'data' => $result
+            ],
+            200
+        );
+    }
+
+
+    private function novaEdicao()
+    {
+
+        $list = Edicao::where('status', '=', 1)->orderByDesc('id')->limit(1);
+        if ($list->get()) {
+            $numero = $list->get()[0]->id + 1;
+            $edicao = new Edicao();
+            $edicao->numero = str_pad($numero, 6, '0', STR_PAD_LEFT);
+            $edicao->status = 0;
+            $edicao->save();
+        }
+    }
+
+    // private function gerarEdicao(){
+    //     $list = Edicao::where('status', '=', 1)->orderByDesc('id')->limit(1);
+    //     $numero = 1;
+    //     if ($list->get()) {
+    //         $numero = $list->get()[0]->id + 1;
+    //     }
+    //     $edicao = new Edicao();
+    //     $edicao->numero = str_pad($numero, 6, '0', STR_PAD_LEFT);
+    //     $edicao->status = 0;
+    //     $edicao->save();
+    // }
 }

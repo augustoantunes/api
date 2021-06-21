@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
 
 
 
@@ -77,6 +78,8 @@ class AuthController extends Controller
                 $role = ($request->role == ('usuario' || 'autor')) ? $request->role : 'usuario';
                 $user->syncRoles([$role]);
 
+                event(new Registered($user));
+
                 DB::commit();
                 return response()->json([
                     'message' => 'Cadastro feito com sucesso',
@@ -102,10 +105,9 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout() {
-        auth()->logout();
-
-        return response()->json(['message' => 'User successfully signed out']);
+    public function logout(Request $request) {
+        auth()->logout(true);
+        return response()->json(['message' => 'Sessão terminada com sucesso!'], 200);
     }
 
     /**
