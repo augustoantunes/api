@@ -72,6 +72,17 @@ Route::group([
     'prefix' => 'usuarios'
 ], function ($router) {
     Route::get('/', [UsersController::class, 'show']);
+
+    Route::group([
+        'prefix' => 'permissoes'
+    ], function ($router) {
+        Route::get('/', [UsersController::class, 'permissoesList']);
+        Route::post('/', [UsersController::class, 'AdicionarPermissao']);
+        Route::delete('/', [UsersController::class, 'RemoverPermissao']);
+
+    });
+
+
 });
 
 Route::group([

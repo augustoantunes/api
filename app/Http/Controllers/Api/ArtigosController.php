@@ -217,7 +217,7 @@ class ArtigosController extends Controller
             return response()->json(
                 [
                     'status' => false,
-                    'message' => 'ERROR_PERMISSION',
+                    'message' => 'Voçê não tem permissão para criar o atigo',
                     'numrow' => 0,
                     'data' => null
                 ],

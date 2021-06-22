@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Hash;
 
 
 
@@ -72,13 +73,14 @@ class AuthController extends Controller
                 $user->email = $request->email;
                 $user->password = bcrypt($request->password);
                 $user->status = true;
+                $user->remember_token = Hash::make($request->email.date("Y-m-d H:i:s"));
                 $user->imagem = '/uploads/users/default-user.jpg';
                 $user->save();
 
                 $role = ($request->role == ('usuario' || 'autor')) ? $request->role : 'usuario';
                 $user->syncRoles([$role]);
 
-                event(new Registered($user));
+                // event(new Registered($user));
 
                 DB::commit();
                 return response()->json([
