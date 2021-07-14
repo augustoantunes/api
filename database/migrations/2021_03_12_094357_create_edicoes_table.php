@@ -16,6 +16,9 @@ class CreateEdicoesTable extends Migration
         Schema::create('edicoes', function (Blueprint $table) {
             $table->id();
             $table->string('numero');
+            $table->string('titulo')->nullable();
+            $table->longText('descricao')->nullable();
+            $table->string('capa')->nullable();
             $table->boolean('status');
             $table->timestamps();
         });

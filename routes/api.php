@@ -41,11 +41,43 @@ Route::group([
     'prefix' => 'artigo'
 ], function ($router) {
     Route::get('/', [ArtigosController::class, 'show']);
+    Route::get('/por-revisar', [ArtigosController::class, 'artigoPorRevisar']);
     Route::post('/', [ArtigosController::class, 'store']);
     Route::delete('/{id}', [ArtigosController::class, 'store']);
     Route::put('/', [ArtigosController::class, 'store']);
     Route::get('/download/{id}', [ArtigosController::class, 'download']);
+    Route::get('/{id}', [ArtigosController::class, 'detalhe']); // detalhe do artigo
 
+    // Publicação e cancelamento de publicação
+
+    Route::post('/estado', [ArtigosController::class, 'estadoArtigo']);
+
+    Route::group([
+        'prefix' => 'revisor'
+    ], function ($router) {
+        Route::post('/', [ArtigosController::class, 'adicionarRevisor']);
+        Route::delete('/', [ArtigosController::class, 'removerRevisor']);
+
+    });
+
+    Route::group([
+        'prefix' => 'avaliar'
+    ], function ($router) {
+        Route::get('/', [AvaliacaoController::class, 'show']);
+        Route::post('/', [AvaliacaoController::class, 'store']);
+    });
+
+});
+
+
+Route::group([
+    'prefix' => 'revisar'
+], function ($router) {
+
+    Route::get('/{id}', [AvaliacaoController::class, 'detalhe']);
+    Route::post('/', [AvaliacaoController::class, 'store']);
+    Route::get('/', [AvaliacaoController::class, 'show']);
+    Route::delete('/', [ArtigosController::class, 'removerRevisor']);
 });
 
 Route::group([
@@ -85,12 +117,6 @@ Route::group([
 
 });
 
-Route::group([
-    'prefix' => 'avaliacao'
-], function ($router) {
-    Route::get('/', [AvaliacaoController::class, 'show']);
-    Route::post('/publicar', [AvaliacaoController::class, 'salvarAvalicao']);
-});
 
 
 Route::get('/email/verify', function () {

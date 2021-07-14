@@ -36,11 +36,19 @@ class UsersController extends Controller
 
         $status = $request->query('status') ? $request->query('status') : 1;
 
-        $Usuario = User::where('status', '=', $status);
-        $Usuario->with('roles');
+        $query = User::where('status', '=', $status);
 
-        $data = $Usuario->get();
+        /* Trazer todos os artigos de um determinado Revisor*/
+        if ($request->query('role') && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
+            $role = $request->query('role');
+            $query->whereHas('roles', function ($roles) use ($role) {
+                $roles->where('name', '=', $role);
+            });
+        }
 
+        $query->with('roles');
+
+        $data = $query->get();
 
 
         return response()->json(
@@ -95,7 +103,7 @@ class UsersController extends Controller
 
             $usuario = User::find($request->user_id);
 
-            if($usuario != null){
+            if ($usuario != null) {
                 $role = Role::find($request->role_id);
                 $usuario->attachRole($role);
             }
@@ -110,8 +118,6 @@ class UsersController extends Controller
                     'data' => $usuario
                 ]
             );
-
-
         } catch (\Exception $e) {
             return response()->json(
                 [
@@ -122,8 +128,6 @@ class UsersController extends Controller
                 ]
             );
         }
-
-
     }
 
 
@@ -144,7 +148,7 @@ class UsersController extends Controller
 
             $usuario = User::find($request->user_id);
 
-            if($usuario != null){
+            if ($usuario != null) {
                 $role = Role::find($request->role_id);
                 $usuario->detachRole($role);
             }
@@ -157,8 +161,6 @@ class UsersController extends Controller
                     'data' => $usuario
                 ]
             );
-
-
         } catch (\Exception $e) {
             return response()->json(
                 [
@@ -169,10 +171,5 @@ class UsersController extends Controller
                 ]
             );
         }
-
-
     }
-
-
-
 }

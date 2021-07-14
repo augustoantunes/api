@@ -7,6 +7,7 @@ use App\Models\Api\Avaliacao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Pagination\Paginator;
 
 class AvaliacaoController extends Controller
 {
@@ -15,26 +16,50 @@ class AvaliacaoController extends Controller
     public function __construct()
     {
 
-        $this->middleware('jwt-auth');
+        $this->middleware('jwt-auth',  ['except' => ['show', 'detalhe', 'showPublich']]);
         $this->Usuario = Auth::user();
     }
 
 
     public function show(Request $request)
     {
+        $pageSize = (!is_null($request->query('pageSize'))) ? $request->query('pageSize') :  8;
+        $lang = (!is_null($request->query('lang'))) ? $request->query('lang') :  'pt';
 
-        $usuario =$request->query('user_id');
-        $avaliacao = Avaliacao::where('user_id', '=', $usuario)
-        ->where('article_id', '=', $request->query('article_id'));
+        /* Criar a paginação de resultados */
+        $currentPage = (!is_null($request->query('currentPage'))) ? $request->query('currentPage') :  1;
+        Paginator::currentPageResolver(function () use ($currentPage) {
+            return $currentPage;
+        });
+
+        $query = Avaliacao::where('artigos_id', '=', $request->query('artigos_id'));
+
+        if( $this->Usuario->hasRole(['editor', 'editor_chefe'])){
+
+        } else if( $this->Usuario->hasRole(['revisor'])){
+            $query->where('users_id', '=', $this->Usuario->id);
+        }
+
+
+        if($request->query('users_id')){
+            $query->where('users_id', '=', $request->query('users_id'));
+        }
+
+
+
+        $query->with(['users']);
+
+        $rowCount = count($query->get());
+        $query->orderBy('id', 'desc')->paginate($pageSize);
 
         return response()->json(
             [
                 'status' => true,
-                'message' => 'Revisão listada com sucesso',
-                'numrow' => 1,
+                'message' => 'Revisão listada com sucesso!',
+                'numrow' => $rowCount,
                 'pageSize' => 0,
                 'currentPage' => 1,
-                'data' => $avaliacao->get(),
+                'data' => $query->get(),
             ],
             200
         );
@@ -44,20 +69,45 @@ class AvaliacaoController extends Controller
         // return Response()->json(['msg' => 'Avaliação não encontrada']);
     }
 
+    public function detalhe($id){
+
+        $query = Avaliacao::where('id', '=', $id);
+        if( $this->Usuario->hasRole(['editor', 'editor_chefe'])){
+
+        } else if( $this->Usuario->hasRole(['revisor'])){
+            $query->where('users_id', '=', $this->Usuario->id);
+        }
+
+        $query->with(['users']);
+
+        return response()->json(
+            [
+                'status' => true,
+                'message' => 'Revisão listada com sucesso!',
+                'numrow' => 1,
+                'pageSize' => 1,
+                'currentPage' => 1,
+                'data' => $query->get(),
+            ],
+            200
+        );
+
+    }
+
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function salvarAvalicao(Request $request)
+    public function store(Request $request)
     {
         //
 
         try {
             $validator = Validator::make($request->all(), [
-                'artigo_id' => 'required',
-                'user_id' => 'required',
+                'artigos_id' => 'required',
+                'users_id' => 'required',
                 'titulo' => 'required',
                 'resumo' => 'required',
                 'contexto' => 'required',
@@ -95,8 +145,8 @@ class AvaliacaoController extends Controller
             } else {
 
                 $avaliacao = new Avaliacao();
-                $avaliacao->artigos_id = $request->artigo_id;
-                $avaliacao->user_id = $request->user_id;
+                $avaliacao->artigos_id = $request->artigos_id;
+                $avaliacao->users_id = $request->users_id;
                 // $avaliacao->descricao = $request->descricao;
                 $avaliacao->titulo = $request->titulo;
                 $avaliacao->resumo = $request->resumo;

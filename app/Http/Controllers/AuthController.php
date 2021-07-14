@@ -92,7 +92,7 @@ class AuthController extends Controller
             return response()->json(
                 [
                     'status' => false,
-                    'message' => 'Erro ao completar a criação do artigo' . $e->getMessage(),
+                    'message' => 'Erro ao criar o usuário' . $e->getMessage(),
                     'numrow' => 0,
                     'data' => null
                 ],

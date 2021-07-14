@@ -108,6 +108,9 @@ class EdicoesController extends Controller
                             foreach ($lstIdArtigos as $index => $idArtigo) {
                                 $artigo = Artigo::find($idArtigo);
                                 $artigo->edicoes_id = $edicao->id;
+                                $artigo->titulo = $edicao->titulo;
+                                $artigo->descricao = $edicao->descricao;
+                                // $artigo->capa = $this->uploadFile($request, 'capa');
                                 $artigo->status = 'PUBLICADO';
                                 $artigo->save();
                             }

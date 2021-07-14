@@ -25,7 +25,7 @@ class CreateArtigosTable extends Migration
             $table->longText('referencias');
             $table->string('file');
             $table->bigInteger('visualizacoes')->default(0);
-            $table->unsignedBigInteger('edicoes_id');
+            $table->unsignedBigInteger('edicoes_id')->nullable();
             $table->timestamps();
 
             $table->foreign('edicoes_id')->references('id')->on('edicoes')->onDelete('CASCADE');
