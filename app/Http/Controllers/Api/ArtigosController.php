@@ -47,35 +47,37 @@ class ArtigosController extends Controller
 
         /* Instancia a classe de artigos para se executar uma pesquisa */
         $query = Artigo::where('lang', '=', $lang);
+        $query->where('status', '=', 'PUBLICADO');
 
         /* Veirificar se o artigo é publicado ou pendente */
         /* Realiza uma pesquisa no banco de dados por uma string digitada */
         if (!is_null($request->query('search'))) {
             $title = $request->query('search');
-            $query->where( function ( Builder $qry) use ($title)  {
+            $query->where(function (Builder $qry) use ($title) {
                 $qry->orWhere('titulo', 'like', '%' . $title . '%');
                 $qry->orWhere('subtitulo', 'like', '%' . $title . '%');
                 $qry->orWhere('resumo', 'like', '%' . $title . '%');
                 $qry->orWhere('referencias', 'like', '%' . $title . '%');
                 return  $qry;
             });
-
         }
 
 
-        if (!$request->query('status')) {
-            if (!($this->Usuario && $this->Usuario->hasRole(['revisor', 'editor', 'editor_chefe']))) {
-                $query->where('status', '=', 'PUBLICADO');
-            }
-            // dd($query);
-        } else if ($request->query('status')) {
+        // if (!$request->query('status')) {
+        //     if (!($this->Usuario && $this->Usuario->hasRole(['revisor', 'editor', 'editor_chefe']))) {
+        //         if (!$request->query('me')) {
+        //             $query->where('status', '=', 'PUBLICADO');
+        //         }
+        //     }
+        //     // dd($query);
+        // } else if ($request->query('status')) {
 
-            if ($this->Usuario && $this->Usuario->hasRole(['revisor', 'editor', 'editor_chefe'])) {
-                $query->where('status', '=', $request->query('status'));
-            } else {
-                $query->where('status', '=', 'PUBLICADO');
-            }
-        }
+        //     if ($this->Usuario && $this->Usuario->hasRole(['revisor', 'editor', 'editor_chefe'])) {
+        //         $query->where('status', '=', $request->query('status'));
+        //     } else {
+
+        //     }
+        // }
 
 
         // /* Veirificar se o artigo é publicado ou pendente */
@@ -163,6 +165,128 @@ class ArtigosController extends Controller
         );
     }
 
+    // Lista os artigos de um determinado usuário logado
+    public function showUser(Request $request)
+    {
+        $pageSize = (!is_null($request->query('pageSize'))) ? $request->query('pageSize') :  8;
+        $lang = (!is_null($request->query('lang'))) ? $request->query('lang') :  'pt';
+
+        /* Criar a paginação de resultados */
+        $currentPage = (!is_null($request->query('currentPage'))) ? $request->query('currentPage') :  1;
+        Paginator::currentPageResolver(function () use ($currentPage) {
+            return $currentPage;
+        });
+
+        $query = Artigo::where('lang', '=', $lang);
+
+        if (!is_null($request->query('search'))) {
+            $title = $request->query('search');
+            $query->where(function (Builder $qry) use ($title) {
+                $qry->orWhere('titulo', 'like', '%' . $title . '%');
+                $qry->orWhere('subtitulo', 'like', '%' . $title . '%');
+                $qry->orWhere('resumo', 'like', '%' . $title . '%');
+                $qry->orWhere('referencias', 'like', '%' . $title . '%');
+                return  $qry;
+            });
+        }
+
+        if ($request->query('status')) {
+            $query->where('status', '=', $request->query('status'));
+        }
+
+        $query->whereHas('intervenientes', function ($destaque) {
+            $destaque->where('users_id', '=', $this->Usuario->id)
+                ->where('role', '=', 'AUTOR');
+        });
+
+
+        $rowCount = count($query->get());
+        $query->orderBy('id', 'desc')->paginate($pageSize);
+
+        /* Cria um array para adicionar os resultados da pesquisa */
+        $data = [];
+
+        foreach ($query->get() as $artigo) {
+            $artigo['categoria'] = $artigo->categorias()->get();
+            array_push($data, $artigo);
+        }
+
+
+        return response()->json(
+            [
+                'status' => true,
+                'message' => 'Meus Artigos Listados com sucesso',
+                'numrow' => $rowCount,
+                'pageSize' => $pageSize,
+                'currentPage' => $currentPage,
+                'data' => $data
+            ]
+        );
+    }
+
+
+
+    // Lista os artigos de um determinado Revisor por Revisar
+    public function showRevisar(Request $request)
+    {
+        $pageSize = (!is_null($request->query('pageSize'))) ? $request->query('pageSize') :  8;
+        $lang = (!is_null($request->query('lang'))) ? $request->query('lang') :  'pt';
+
+        /* Criar a paginação de resultados */
+        $currentPage = (!is_null($request->query('currentPage'))) ? $request->query('currentPage') :  1;
+        Paginator::currentPageResolver(function () use ($currentPage) {
+            return $currentPage;
+        });
+
+        $query = Artigo::where('lang', '=', $lang);
+        $query->where('status', '!=', 'PUBLICADO');
+
+        if (!is_null($request->query('search'))) {
+            $title = $request->query('search');
+            $query->where(function (Builder $qry) use ($title) {
+                $qry->orWhere('titulo', 'like', '%' . $title . '%');
+                $qry->orWhere('subtitulo', 'like', '%' . $title . '%');
+                $qry->orWhere('resumo', 'like', '%' . $title . '%');
+                $qry->orWhere('referencias', 'like', '%' . $title . '%');
+                return  $qry;
+            });
+        }
+
+        if($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])){
+
+        } else {
+            $query->whereHas('intervenientes', function ($destaque) {
+                $destaque->where('users_id', '=', $this->Usuario->id)
+                    ->where('role', '=', 'REVISOR');
+            });
+        }
+
+        $rowCount = count($query->get());
+        $query->orderBy('id', 'desc')->paginate($pageSize);
+
+        /* Cria um array para adicionar os resultados da pesquisa */
+        $data = [];
+
+        foreach ($query->get() as $artigo) {
+            $artigo['categoria'] = $artigo->categorias()->get();
+            array_push($data, $artigo);
+        }
+
+
+        return response()->json(
+            [
+                'status' => true,
+                'message' => 'Artigos do revisor Listados com sucesso',
+                'numrow' => $rowCount,
+                'pageSize' => $pageSize,
+                'currentPage' => $currentPage,
+                'data' => $data
+            ]
+        );
+    }
+
+
+
     // * Traz todos os artigos de um revisar logado se  o usuário logado admin tragaz todos os artigos
     public function artigoPorRevisar(Request $request)
     {
@@ -218,15 +342,41 @@ class ArtigosController extends Controller
 
     public function detalhe($id)
     {
-
-
         if ($id) {
-            $artigo = Artigo::where('id', '=', $id)->with(['autores', 'categorias']);
-            if ($this->Usuario &&  $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
+            $artigo = Artigo::where('id', '=', $id);
+            $artigo->with(['autores', 'edicoes']);
+
+            if ($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
                 $artigo->with(['revisores']);
             }
 
-            $artigo->with(['autores','edicoes']);
+
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'Artigos Listados com sucesso',
+                    'numrow' => 1,
+                    'pageSize' => 1,
+                    'currentPage' => 1,
+                    'data' => $artigo->get()
+                ]
+            );
+        }
+    }
+    public function detalheRevisar($id)
+    {
+        if ($id) {
+            $artigo = Artigo::where('id', '=', $id);
+
+
+            // if ($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
+            //     $artigo->with(['revisores']);
+            // }
+            $artigo->with(['autores', 'edicoes', 'revisores']);
+
+
+
 
             return response()->json(
                 [
@@ -349,6 +499,9 @@ class ArtigosController extends Controller
 
                     $artigo = Artigo::find($request->artigos_id);
                     $artigo->status = $request->status;
+                    if ($request->edicao) {
+                        $artigo->edicoes_id = null;
+                    }
                     $artigo->save();
 
 
@@ -619,6 +772,4 @@ class ArtigosController extends Controller
             return Storage::download('public/files/' . $artigo->file);
         }
     }
-
-
 }

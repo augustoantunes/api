@@ -40,18 +40,24 @@ Route::group([
 Route::group([
     'prefix' => 'artigo'
 ], function ($router) {
-    Route::get('/', [ArtigosController::class, 'show']);
-    Route::get('/por-revisar', [ArtigosController::class, 'artigoPorRevisar']);
-    Route::post('/', [ArtigosController::class, 'store']);
-    Route::delete('/{id}', [ArtigosController::class, 'store']);
+    Route::get('/pesquisar', [ArtigosController::class, 'show']);
+    Route::get('/revisar', [ArtigosController::class, 'showRevisar']); // detalhe do artigo
+    Route::get('/user', [ArtigosController::class, 'showUser']);
     Route::put('/', [ArtigosController::class, 'store']);
+    Route::post('/', [ArtigosController::class, 'store']);
+    Route::get('/{id}', [ArtigosController::class, 'detalhe']);
+    Route::delete('/{id}', [ArtigosController::class, 'store']);
     Route::get('/download/{id}', [ArtigosController::class, 'download']);
-    Route::get('/{id}', [ArtigosController::class, 'detalhe']); // detalhe do artigo
+    // Route::get('/por-revisar', [ArtigosController::class, 'artigoPorRevisar']);
+
+    // Listagem e Detalhe  de artigos em revisão
+    Route::get('/revisar/{id}', [ArtigosController::class, 'detalheRevisar']); // detalhe do artigo
 
     // Publicação e cancelamento de publicação
 
     Route::post('/estado', [ArtigosController::class, 'estadoArtigo']);
 
+    // Revisores dos artigos
     Route::group([
         'prefix' => 'revisor'
     ], function ($router) {
@@ -70,15 +76,15 @@ Route::group([
 });
 
 
-Route::group([
-    'prefix' => 'revisar'
-], function ($router) {
+// Route::group([
+//     'prefix' => 'revisar'
+// ], function ($router) {
 
-    Route::get('/{id}', [AvaliacaoController::class, 'detalhe']);
-    Route::post('/', [AvaliacaoController::class, 'store']);
-    Route::get('/', [AvaliacaoController::class, 'show']);
-    Route::delete('/', [ArtigosController::class, 'removerRevisor']);
-});
+//     // Route::get('/{id}', [AvaliacaoController::class, 'detalhe']);
+//     Route::post('/', [AvaliacaoController::class, 'store']);
+//     // Route::get('/', [AvaliacaoController::class, 'show']);
+//     Route::delete('/', [ArtigosController::class, 'removerRevisor']);
+// });
 
 Route::group([
     'prefix' => 'categoria'
