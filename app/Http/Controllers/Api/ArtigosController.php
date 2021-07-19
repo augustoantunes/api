@@ -136,7 +136,6 @@ class ArtigosController extends Controller
             });
         }
 
-
         $rowCount = count($query->get());
         $query->orderBy('id', 'desc')->paginate($pageSize);
 
@@ -151,7 +150,6 @@ class ArtigosController extends Controller
             $artigo['categoria'] = $artigo->categorias()->get();
             array_push($data, $artigo);
         }
-
 
         return response()->json(
             [
@@ -210,7 +208,6 @@ class ArtigosController extends Controller
             $artigo['categoria'] = $artigo->categorias()->get();
             array_push($data, $artigo);
         }
-
 
         return response()->json(
             [
