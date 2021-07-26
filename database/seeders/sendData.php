@@ -17,16 +17,18 @@ class sendData extends Seeder
         //
 
         DB::table('ciencia')->insert([
-            ['ramo_ciencia' => 'Ciências Socias'],
+            ['ramo_ciencia' => 'Ciências Sociais'],
             ['ramo_ciencia' => 'Ciências Exatas'],
             ['ramo_ciencia' => 'Ciências Informáticas'],
             ['ramo_ciencia' => 'Ciências Humanísticas']
         ]);
 
         DB::table('categorias')->insert([
-            ['nome' => 'Matemática', 'slug' => 'matematica', 'ciencia_id' => 1],
-            ['nome' => 'Direito', 'slug' => 'direito', 'ciencia_id' => 2],
-            ['nome' => 'Computação', 'slug' => 'computacao', 'ciencia_id' => 2]
+            ['nome' => 'Matemática', 'slug' => 'matematica', 'ciencia_id' => 2],
+            ['nome' => 'Direito', 'slug' => 'direito', 'ciencia_id' => 1],
+            ['nome' => 'Psicologia Criminal', 'slug' => 'direito', 'ciencia_id' => 1],
+            ['nome' => 'Computação', 'slug' => 'computacao', 'ciencia_id' => 3],
+            ['nome' => 'Telecomunicações', 'slug' => 'computacao', 'ciencia_id' => 3],
         ]);
 
         DB::table('edicoes')->insert([

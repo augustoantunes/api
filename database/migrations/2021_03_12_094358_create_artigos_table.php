@@ -20,9 +20,10 @@ class CreateArtigosTable extends Migration
             $table->string('titulo');
             $table->string('subtitulo')->nullable();
             $table->string('imagem')->nullable();
-            $table->string('slug');
+            $table->string('tipoartigo')->nullable();
+            $table->string('slug')->nullable();
             $table->longText('resumo');
-            $table->longText('referencias');
+            $table->longText('referencias')->nullable();
             $table->string('file');
             $table->bigInteger('visualizacoes')->default(0);
             $table->unsignedBigInteger('edicoes_id')->nullable();

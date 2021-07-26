@@ -46,7 +46,7 @@ Route::group([
     Route::put('/', [ArtigosController::class, 'store']);
     Route::post('/', [ArtigosController::class, 'store']);
     Route::get('/{id}', [ArtigosController::class, 'detalhe']);
-    Route::delete('/{id}', [ArtigosController::class, 'store']);
+    Route::delete('/{id}', [ArtigosController::class, 'delete']);
     Route::get('/download/{id}', [ArtigosController::class, 'download']);
     // Route::get('/por-revisar', [ArtigosController::class, 'artigoPorRevisar']);
 
@@ -76,21 +76,22 @@ Route::group([
 });
 
 
-// Route::group([
-//     'prefix' => 'revisar'
-// ], function ($router) {
+Route::group([
+    'prefix' => 'revisar'
+], function ($router) {
 
-//     // Route::get('/{id}', [AvaliacaoController::class, 'detalhe']);
-//     Route::post('/', [AvaliacaoController::class, 'store']);
-//     // Route::get('/', [AvaliacaoController::class, 'show']);
-//     Route::delete('/', [ArtigosController::class, 'removerRevisor']);
-// });
+    Route::get('/{id}', [AvaliacaoController::class, 'detalhe']);
+    Route::post('/', [AvaliacaoController::class, 'store']);
+    // Route::get('/', [AvaliacaoController::class, 'show']);
+    Route::delete('/', [ArtigosController::class, 'removerRevisor']);
+});
 
 Route::group([
     'prefix' => 'categoria'
 ], function ($router) {
     Route::get('/', [CategoriaController::class, 'index']);
-    Route::get('/{id}', [CategoriaController::class, 'show']);
+    Route::get('/detalhe/{id}', [CategoriaController::class, 'show']);
+    Route::get('/ciencia/{id}', [CategoriaController::class, 'conhecimento']);
     Route::post('/', [CategoriaController::class, 'store']);
     Route::delete('/{id}', [CategoriaController::class, 'store']);
     Route::put('/', [CategoriaController::class, 'store']);

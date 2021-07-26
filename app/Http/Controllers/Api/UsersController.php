@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Builder;
 
 class UsersController extends Controller
 {
@@ -46,16 +47,30 @@ class UsersController extends Controller
             });
         }
 
+        /* Trazer todos os artigos de um determinado Revisor*/
+        if ((!is_null($request->query('search'))) && $this->Usuario->hasRole(['editor', 'editor_chefe']))  {
+
+            $nameEmail = $request->query('search');
+
+            $query->where(function (Builder $qry) use($nameEmail)  {
+                $qry->orWhere('name', 'like', '%' . $nameEmail . '%');
+                $qry->orWhere('email', 'like', '%' . $nameEmail . '%');
+
+            });
+        }
+
         $query->with('roles');
 
+        $rowCount = count($query->get());
+        $query->orderBy('id', 'desc')->paginate($pageSize);
         $data = $query->get();
 
 
         return response()->json(
             [
                 'status' => true,
-                'message' => 'Artigos Listados com sucesso',
-                // 'numrow' => $rowCount,
+                'message' => 'Usuários Listados com sucesso',
+                'numrow' => $rowCount,
                 'pageSize' => $pageSize,
                 'currentPage' => $currentPage,
                 'data' => $data
@@ -69,9 +84,7 @@ class UsersController extends Controller
 
     public function permissoesList()
     {
-        // if($this->Usuario->hasRole(['editor', 'editor_chefe'])){
 
-        // }
         $roles = Role::all();
 
         return response()->json(

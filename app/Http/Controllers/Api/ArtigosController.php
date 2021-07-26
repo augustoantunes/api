@@ -221,8 +221,6 @@ class ArtigosController extends Controller
         );
     }
 
-
-
     // Lista os artigos de um determinado Revisor por Revisar
     public function showRevisar(Request $request)
     {
@@ -236,7 +234,6 @@ class ArtigosController extends Controller
         });
 
         $query = Artigo::where('lang', '=', $lang);
-        $query->where('status', '!=', 'PUBLICADO');
 
         if (!is_null($request->query('search'))) {
             $title = $request->query('search');
@@ -249,8 +246,7 @@ class ArtigosController extends Controller
             });
         }
 
-        if($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])){
-
+        if ($this->Usuario && $this->Usuario->hasRole(['editor', 'editor_chefe'])) {
         } else {
             $query->whereHas('intervenientes', function ($destaque) {
                 $destaque->where('users_id', '=', $this->Usuario->id)
@@ -281,8 +277,6 @@ class ArtigosController extends Controller
             ]
         );
     }
-
-
 
     // * Traz todos os artigos de um revisar logado se  o usuário logado admin tragaz todos os artigos
     public function artigoPorRevisar(Request $request)
@@ -361,6 +355,7 @@ class ArtigosController extends Controller
             );
         }
     }
+
     public function detalheRevisar($id)
     {
         if ($id) {
@@ -387,9 +382,6 @@ class ArtigosController extends Controller
             );
         }
     }
-
-
-
 
     public function store(Request $request)
     {
@@ -422,8 +414,16 @@ class ArtigosController extends Controller
                     $artigo->subtitulo = $request->subtitulo ? $request->subtitulo : null;
                     $artigo->slug = Str::slug($request->titulo);
                     $artigo->resumo = $request->resumo;
+                    if ($artigo->tipoartigo) {
+                        $artigo->tipoartigo = $request->tipoartigo;
+                    }
+
                     $artigo->referencias = $request->referencias;
-                    $artigo->imagem = $this->uploadFile($request, 'imagem');
+
+                    if ($artigo->imagem) {
+                        $artigo->imagem = $this->uploadFile($request, 'imagem');
+                    }
+
                     $artigo->file = $this->uploadFile($request, 'file');
                     $artigo->edicoes_id = $edicao->id;
                     $artigo->save();
@@ -537,7 +537,6 @@ class ArtigosController extends Controller
             );
         }
     }
-
 
     public function carregarEdicao()
     {
@@ -759,6 +758,55 @@ class ArtigosController extends Controller
                 500
             );
         }
+    }
+
+    public function delete($id)
+    {
+
+        try {
+
+            DB::beginTransaction();
+
+            $query = Artigo::where('id', '=', $id);
+            $query->where('status', '!=', 'PUBLICADO');
+
+            $query->whereHas('intervenientes', function ($destaque) {
+                $destaque->where('users_id', '=', $this->Usuario->id)
+                    ->where('role', '=', 'AUTOR');
+            });
+
+            $query->delete();
+
+            $queryCategoria = CategoriasArtigos::where('artigos_id', '=', $id);
+            $queryCategoria->delete();
+
+            $interveniente = Interveniente::where('artigos_id', '=', $id);
+            $interveniente->delete();
+
+            DB::commit();
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'Artigo Eliminado com sucesso!',
+                    'numrow' => 1,
+                    'data' => null
+                ],
+                200
+            );
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Não foi possível eliminar o artigo',
+                    'numrow' => 0,
+                    'data' => null
+                ],
+                200
+            );
+        }
+
+
     }
 
     public function download($id)

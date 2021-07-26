@@ -86,6 +86,33 @@ class CategoriaController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function conhecimento($id)
+    {
+        $result = [];
+        if($id){
+            $data = Categoria::where('ciencia_id', '=', $id);
+            $result = $data->get();
+        }
+
+
+        return response()->json(
+            [
+                'status' => true,
+                'message' => 'Categorias Listadas com Sucesso',
+                'numrow' => count($result),
+                'pageSize' => 0,
+                'currentPage' => 0,
+                'data' => $result
+            ]
+        );
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
