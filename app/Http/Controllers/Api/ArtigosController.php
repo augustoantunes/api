@@ -188,9 +188,6 @@ class ArtigosController extends Controller
             });
         }
 
-        if ($request->query('status')) {
-            $query->where('status', '=', $request->query('status'));
-        }
 
         $query->whereHas('intervenientes', function ($destaque) {
             $destaque->where('users_id', '=', $this->Usuario->id)
@@ -234,6 +231,7 @@ class ArtigosController extends Controller
         });
 
         $query = Artigo::where('lang', '=', $lang);
+        $query->where('status', '!=', 'PUBLICADO');
 
         if (!is_null($request->query('search'))) {
             $title = $request->query('search');
